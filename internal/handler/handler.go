@@ -9,7 +9,7 @@ func NewHanlder() Handler {
 	return Handler{}
 }
 
-func InitRouting() *gin.Engine {
+func (h *Handler) InitRouting() *gin.Engine {
 	router := gin.Default()
 
 	auth := router.Group("/auth")
