@@ -6,13 +6,21 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/DavidJackso/TodoApi/internal/database"
 	Handler "github.com/DavidJackso/TodoApi/internal/handler"
+	"github.com/DavidJackso/TodoApi/internal/models"
+	"github.com/DavidJackso/TodoApi/internal/repository"
+	"github.com/DavidJackso/TodoApi/internal/service"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
 
-	handler := Handler.NewHanlder()
+	db := database.ConnectToDb()
+	db.AutoMigrate(&models.User{})
+	repository := repository.NewRepository(db)
+	service := service.NewService(repository)
+	handler := Handler.NewHanlder(service)
 	router := handler.InitRouting()
 
 	//TODO: Move to config

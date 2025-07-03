@@ -13,13 +13,24 @@ func (h *Handler) signUp(c *gin.Context) {
 	err := c.Bind(&user)
 	if err != nil {
 		logrus.Info("bad request", err)
-		c.JSON(http.StatusBadRequest, "bad request")
+		c.JSON(http.StatusBadRequest, map[string]int{
+			"id": 0,
+		})
 		return
 	}
 	id, err := h.service.Regestration(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, id)
+		c.JSON(http.StatusInternalServerError, map[string]int{
+			"id": 0,
+		})
+		return
 	}
+
+	logrus.Info("Succes sign up")
+
+	c.JSON(http.StatusOK, map[string]int{
+		"id": id,
+	})
 }
 
 func (h *Handler) signIn(c *gin.Context) {
