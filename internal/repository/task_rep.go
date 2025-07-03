@@ -26,7 +26,14 @@ func (r *TaskRepositoryGorm) CreateTask(task models.Task) (int, error) {
 }
 
 func (r *TaskRepositoryGorm) DeleteTask(id int) error {
-
+	task, err := getByID(id, *r.db)
+	if err != nil {
+		logrus.Error("bad")
+	}
+	result := r.db.Delete(&task)
+	if result.Error != nil {
+		logrus.Error(err)
+	}
 	return nil
 }
 
@@ -35,14 +42,22 @@ func (r *TaskRepositoryGorm) UpdateTask(id int) (models.Task, error) {
 }
 
 func (r *TaskRepositoryGorm) GetTask(id int) (models.Task, error) {
-	var task models.Task
-	result := r.db.Where("id = ?", id).First(&task)
-	if result.Error != nil {
-		return models.Task{}, result.Error
+	task, err := getByID(id, *r.db)
+	if err.Error != nil {
+		return models.Task{}, err
 	}
 	return task, nil
 }
 
 func (r *TaskRepositoryGorm) GetAllTasks() ([]models.Task, error) {
 	return nil, nil
+}
+
+func getByID(id int, db gorm.DB) (models.Task, error) {
+	var task models.Task
+	result := db.Where("id = ?", id).First(&task)
+	if result.Error != nil {
+		return models.Task{}, result.Error
+	}
+	return task, nil
 }

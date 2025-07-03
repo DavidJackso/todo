@@ -57,3 +57,23 @@ func (h *Handler) GetTask(c *gin.Context) {
 	})
 
 }
+
+func (h *Handler) DeleteTask(c *gin.Context) {
+	id := c.Param("id")
+
+	uid, err := strconv.Atoi(id)
+	if err != nil {
+		logrus.Info("Bad parametr")
+		c.JSON(http.StatusBadRequest, "Badddddd")
+		return
+	}
+
+	err = h.service.DeleteTask(uid)
+	if err != nil {
+		logrus.Error(err)
+		c.JSON(http.StatusInternalServerError, "bad")
+		return
+	}
+
+	c.JSON(http.StatusOK, "ok")
+}

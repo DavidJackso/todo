@@ -37,6 +37,10 @@ func (s *TodoService) GetTask(id int) (models.Task, error) {
 }
 
 func (s *TodoService) DeleteTask(id int) error {
+	err := s.rep.DeleteTask(id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
