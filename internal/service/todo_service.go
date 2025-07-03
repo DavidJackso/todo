@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/DavidJackso/TodoApi/internal/models"
 	"github.com/DavidJackso/TodoApi/internal/repository"
 	"github.com/sirupsen/logrus"
@@ -26,7 +28,12 @@ func (s *TodoService) CreateTask(task models.Task) (int, error) {
 }
 
 func (s *TodoService) GetTask(id int) (models.Task, error) {
-	return models.Task{}, nil
+	task, err := s.rep.TaskRepository.GetTask(id)
+	if err != nil {
+		return task, err
+	}
+	fmt.Print(task)
+	return task, nil
 }
 
 func (s *TodoService) DeleteTask(id int) error {

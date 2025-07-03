@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/DavidJackso/TodoApi/internal/models"
 	"github.com/gin-gonic/gin"
@@ -32,6 +33,27 @@ func (h *Handler) CreateTask(c *gin.Context) {
 
 	c.JSON(http.StatusOK, map[string]int{
 		"id": id,
+	})
+}
+
+func (h *Handler) GetTask(c *gin.Context) {
+	id := c.Param("id")
+
+	uid, err := strconv.Atoi(id)
+	if err != nil {
+		logrus.Info("bad request")
+		c.JSON(http.StatusBadRequest, map[int]string{})
+		return
+	}
+
+	task, err := h.service.GetTask(uid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, map[int]models.Task{})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[uint]models.Task{
+		task.ID: task,
 	})
 
 }

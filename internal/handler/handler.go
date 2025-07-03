@@ -34,7 +34,7 @@ func (h *Handler) InitRouting() *gin.Engine {
 	tasks := router.Group("/task")
 	{
 		tasks.POST("/", h.CreateTask)
-		tasks.GET("/:id")
+		tasks.GET("/:id", h.GetTask)
 		tasks.GET("/")
 		tasks.DELETE("/:id")
 	}

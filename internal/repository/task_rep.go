@@ -26,6 +26,7 @@ func (r *TaskRepositoryGorm) CreateTask(task models.Task) (int, error) {
 }
 
 func (r *TaskRepositoryGorm) DeleteTask(id int) error {
+
 	return nil
 }
 
@@ -34,7 +35,12 @@ func (r *TaskRepositoryGorm) UpdateTask(id int) (models.Task, error) {
 }
 
 func (r *TaskRepositoryGorm) GetTask(id int) (models.Task, error) {
-	return models.Task{}, nil
+	var task models.Task
+	result := r.db.Where("id = ?", id).First(&task)
+	if result.Error != nil {
+		return models.Task{}, result.Error
+	}
+	return task, nil
 }
 
 func (r *TaskRepositoryGorm) GetAllTasks() ([]models.Task, error) {
