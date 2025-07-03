@@ -1,8 +1,23 @@
 package repository
 
-type Repository struct {
+import (
+	"github.com/DavidJackso/TodoApi/internal/models"
+	"gorm.io/gorm"
+)
+
+type UserRepository interface {
+	CreateUser(models.User) (int, error)
+	DeleteUser(int) error
+	GetUser(int) (models.User, error)
+	UpdateUser(models.User) error
 }
 
-func NewRepository() {
+type Repository struct {
+	UserRepository
+}
 
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{
+		UserRepository: NewUserRepositoryGorm(db),
+	}
 }
