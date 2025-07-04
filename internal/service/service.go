@@ -6,10 +6,10 @@ import (
 )
 
 type authorization interface {
-	Regestration(models.User) (int, error)
-	Authtorization(id int) (string, error)
+	CreateNewUser(models.User) (int, error)
+	GenerateToken(string, string) (string, error)
+	ParserToken(string) (int, error)
 }
-
 type todoService interface {
 	CreateTask(models.Task) (int, error)
 	GetTask(int) (models.Task, error)
