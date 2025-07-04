@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"fmt"
+	"errors"
 
+	"github.com/DavidJackso/TodoApi/internal/lib/errs"
 	"github.com/DavidJackso/TodoApi/internal/models"
-	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -20,16 +20,18 @@ func NewUserRepositoryGorm(dbgorm *gorm.DB) *UserRepositoryGorm {
 
 func (r *UserRepositoryGorm) CreateUser(user models.User) (int, error) {
 	result := r.db.Create(&user)
-	if result.Error != nil {
-		logrus.Error("user not created", fmt.Sprintf("err:%s", result.Error))
-		return 0, result.Error
-	}
-	return int(user.ID), nil
+	return int(user.ID), result.Error
 }
 
-// TODO:Implement me
-func (r *UserRepositoryGorm) GetUser(id int) (models.User, error) {
-	return models.User{}, nil
+func (r *UserRepositoryGorm) GetUser(email, password string) (models.User, error) {
+	var user models.User
+
+	result := r.db.Where("email=?", email).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return user, errs.ErrInvaliEmailorPassword
+	}
+
+	return user, result.Error
 }
 
 // TODO:Implement me
