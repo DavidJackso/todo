@@ -18,14 +18,22 @@ type todoService interface {
 	GetTasks(id int) ([]models.Task, error)
 }
 
+type profileService interface {
+	GetProfile(id int) (models.User, error)
+	DeleteProfile(int) error
+	UpdateProfile(int, models.User) (models.User, error)
+}
+
 type Service struct {
 	authorization
 	todoService
+	profileService
 }
 
 func NewService(db *repository.Repository) *Service {
 	return &Service{
-		authorization: NewAuthorizationService(db),
-		todoService:   NewTodoService(db),
+		authorization:  NewAuthorizationService(db),
+		todoService:    NewTodoService(db),
+		profileService: NewProfileService(db),
 	}
 }

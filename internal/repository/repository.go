@@ -9,7 +9,8 @@ type UserRepository interface {
 	CreateUser(models.User) (int, error)
 	DeleteUser(int) error
 	GetUser(string, string) (models.User, error)
-	UpdateUser(models.User) error
+	GetUserByID(int) (models.User, error)
+	UpdateUser(int, models.User) (models.User, error)
 }
 
 type TaskRepository interface {

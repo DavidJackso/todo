@@ -20,6 +20,5 @@ type Tag struct {
 
 type Category struct {
 	gorm.Model
-	Tasks []Task `gorm:"foreignKey:CategoryID"`
 	Title string `json:"title"`
 }

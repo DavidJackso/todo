@@ -28,8 +28,8 @@ func (h *Handler) InitRouting() *gin.Engine {
 		user := api.Group("/profile")
 		{
 			user.GET("/")
-			user.PATCH("/")
-			user.DELETE("/")
+			user.PATCH("/", h.UpdateProfile)
+			user.DELETE("/", h.DeleteProfile)
 		}
 
 		tasks := api.Group("/task")
