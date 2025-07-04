@@ -10,19 +10,24 @@ import (
 )
 
 func (h *Handler) CreateTask(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		logrus.Error(err)
+	}
+
 	var task models.Task
 
-	err := c.Bind(&task)
+	err = c.Bind(&task)
 
 	if err != nil {
-		logrus.Info("Bad request")
+		logrus.Info(err)
 		c.JSON(http.StatusBadRequest, map[string]int{
 			"id": 0,
 		})
 		return
 	}
 
-	id, err := h.service.CreateTask(task)
+	id, err := h.service.CreateTask(task, userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]int{
@@ -79,5 +84,5 @@ func (h *Handler) DeleteTask(c *gin.Context) {
 }
 
 func (h *Handler) GetAllTask(c *gin.Context) {
-	return
+
 }

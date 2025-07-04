@@ -16,7 +16,8 @@ func NewTaskRepositoryGorm(db *gorm.DB) *TaskRepositoryGorm {
 	}
 }
 
-func (r *TaskRepositoryGorm) CreateTask(task models.Task) (int, error) {
+func (r *TaskRepositoryGorm) CreateTask(task models.Task, userID int) (int, error) {
+	task.UserID = uint(userID)
 	result := r.db.Create(&task)
 	if result.Error != nil {
 		logrus.Error("Error add new task")
@@ -43,7 +44,7 @@ func (r *TaskRepositoryGorm) UpdateTask(id int) (models.Task, error) {
 
 func (r *TaskRepositoryGorm) GetTask(id int) (models.Task, error) {
 	task, err := getByID(id, *r.db)
-	if err.Error != nil {
+	if err != nil {
 		return models.Task{}, err
 	}
 	return task, nil

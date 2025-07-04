@@ -18,8 +18,8 @@ func NewTodoService(repository *repository.Repository) *TodoService {
 	}
 }
 
-func (s *TodoService) CreateTask(task models.Task) (int, error) {
-	id, err := s.rep.CreateTask(task)
+func (s *TodoService) CreateTask(task models.Task, userID int) (int, error) {
+	id, err := s.rep.CreateTask(task, userID)
 	if err != nil {
 		logrus.Info("error create task")
 		return 0, err

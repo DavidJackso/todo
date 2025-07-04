@@ -8,10 +8,10 @@ import (
 type authorization interface {
 	CreateNewUser(models.User) (int, error)
 	GenerateToken(string, string) (string, error)
-	ParserToken(string) (int, error)
+	ParseToken(string) (int, error)
 }
 type todoService interface {
-	CreateTask(models.Task) (int, error)
+	CreateTask(models.Task, int) (int, error)
 	GetTask(int) (models.Task, error)
 	DeleteTask(int) error
 	UpdateTask(int) (models.Task, error)

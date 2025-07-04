@@ -39,8 +39,9 @@ func (s *AuthorizationService) CreateNewUser(user models.User) (int, error) {
 	return id, nil
 }
 
-func (s *AuthorizationService) ParserToken(tokenString string) (int, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
+func (s *AuthorizationService) ParseToken(tokenString string) (int, error) {
+	claims := jwt.MapClaims{}
+	_, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
 		}
@@ -50,16 +51,12 @@ func (s *AuthorizationService) ParserToken(tokenString string) (int, error) {
 		return 0, err
 	}
 
-	claims, ok := token.Claims.(*jwt.MapClaims)
+	idFloat, ok := claims["id"].(float64)
 	if !ok {
-		return 0, errors.New("failed get calims")
+		return 0, errors.New("invalid token payload")
 	}
-	id, ok := (*claims)["id"].(int)
-	if !ok {
-		return 0, errors.New("failed get token")
-	}
-	return id, nil
 
+	return int(idFloat), nil
 }
 
 func (s *AuthorizationService) GenerateToken(email, password string) (string, error) {

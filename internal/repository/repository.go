@@ -13,7 +13,7 @@ type UserRepository interface {
 }
 
 type TaskRepository interface {
-	CreateTask(models.Task) (int, error)
+	CreateTask(models.Task, int) (int, error)
 	GetTask(id int) (models.Task, error)
 	DeleteTask(id int) error
 	UpdateTask(id int) (models.Task, error)
