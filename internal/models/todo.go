@@ -8,14 +8,14 @@ type Task struct {
 	Description string   `json:"description"`
 	CategoryID  uint     `json:"category_id"`
 	Category    Category `json:"category" gorm:"foreignKey:CategoryID"`
-	Tags        []Tag    `gorm:"many2many:user_tags"`
+	Tags        []Tag    `gorm:"many2many:task_tags"`
 	UserID      uint
 }
 
 type Tag struct {
 	gorm.Model
 	Title string `json:"title"`
-	Tasks []Task `gorm:"many2many:user_tags" `
+	Tasks []Task `gorm:"many2many:task_tags" `
 }
 
 type Category struct {

@@ -42,8 +42,18 @@ func (r *TaskRepositoryGorm) DeleteTask(id int) error {
 	return nil
 }
 
-func (r *TaskRepositoryGorm) UpdateTask(id int) (models.Task, error) {
-	return models.Task{}, nil
+func (r *TaskRepositoryGorm) UpdateTask(id int, updTask models.Task) (models.Task, error) {
+	task, err := getByID(id, *r.db)
+	if err != nil {
+		return models.Task{}, err
+	}
+	updTask.ID = task.ID
+
+	task = updTask
+
+	r.db.Save(task)
+
+	return task, nil
 }
 
 func (r *TaskRepositoryGorm) GetTask(id int) (models.Task, error) {
@@ -51,11 +61,19 @@ func (r *TaskRepositoryGorm) GetTask(id int) (models.Task, error) {
 	if err != nil {
 		return models.Task{}, err
 	}
+	task.Category = r.GetCategoryByID(int(task.CategoryID))
+	fmt.Print(task.CategoryID)
 	return task, nil
 }
 
-func (r *TaskRepositoryGorm) GetTasks() ([]models.Task, error) {
-	return nil, nil
+func (r *TaskRepositoryGorm) GetTasks(userID int) ([]models.Task, error) {
+	var tasks []models.Task
+	result := r.db.Where("user_id = ?", userID).Find(&tasks)
+	if result.Error != nil {
+		logrus.Error(result.Error)
+		return nil, result.Error
+	}
+	return tasks, nil
 }
 func getByID(id int, db gorm.DB) (models.Task, error) {
 	var task models.Task
@@ -76,9 +94,10 @@ func (r *TaskRepositoryGorm) CreateCategory(title string) {
 	}
 }
 
+// TODO: remake
 func (r *TaskRepositoryGorm) GetCategoryByID(id int) models.Category {
 	var category models.Category
-	result := r.db.Where("id = ?", id)
+	result := r.db.Where("id = ?", id).First(&category)
 	if result.Error != nil {
 		return models.Category{}
 	}

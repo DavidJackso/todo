@@ -1,8 +1,6 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/DavidJackso/TodoApi/internal/models"
 	"github.com/DavidJackso/TodoApi/internal/repository"
 	"github.com/sirupsen/logrus"
@@ -32,7 +30,6 @@ func (s *TodoService) GetTask(id int) (models.Task, error) {
 	if err != nil {
 		return task, err
 	}
-	fmt.Print(task)
 	return task, nil
 }
 
@@ -44,11 +41,20 @@ func (s *TodoService) DeleteTask(id int) error {
 	return nil
 }
 
-func (s *TodoService) UpdateTask(id int) (models.Task, error) {
-	return models.Task{}, nil
+func (s *TodoService) UpdateTask(id int, updTask models.Task) (models.Task, error) {
+	task, err := s.rep.UpdateTask(id, updTask)
+	if err != nil {
+		return models.Task{}, err
+	}
+	return task, nil
 }
 
-func (s *TodoService) GetTasks() ([]models.Task, error) {
-	return nil, nil
+func (s *TodoService) GetTasks(id int) ([]models.Task, error) {
+	tasks, err := s.rep.GetTasks(id)
+	if err != nil {
+		logrus.Error(err)
+		return nil, err
+	}
 
+	return tasks, nil
 }

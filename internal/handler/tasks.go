@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -83,6 +84,39 @@ func (h *Handler) DeleteTask(c *gin.Context) {
 	c.JSON(http.StatusOK, "ok")
 }
 
-func (h *Handler) GetAllTask(c *gin.Context) {
+func (h *Handler) GetTasks(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		logrus.Error("bad")
+	}
 
+	tasks, err := h.service.GetTasks(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "bad")
+		return
+	}
+	fmt.Print(tasks)
+	c.JSON(http.StatusOK, tasks)
+}
+
+func (h *Handler) UpdateTask(c *gin.Context) {
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "")
+		return
+	}
+	var taskUpd models.Task
+
+	c.Bind(taskUpd)
+
+	task, err := h.service.UpdateTask(id, taskUpd)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "ok")
+		return
+	}
+
+	fmt.Print(task)
+	c.JSON(http.StatusOK, task)
 }

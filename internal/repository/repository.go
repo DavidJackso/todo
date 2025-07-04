@@ -15,9 +15,9 @@ type UserRepository interface {
 type TaskRepository interface {
 	CreateTask(models.Task, int) (int, error)
 	GetTask(id int) (models.Task, error)
-	DeleteTask(id int) error
-	UpdateTask(id int) (models.Task, error)
-	GetTasks() ([]models.Task, error)
+	DeleteTask(int) error
+	UpdateTask(int, models.Task) (models.Task, error)
+	GetTasks(int) ([]models.Task, error)
 }
 
 type Repository struct {

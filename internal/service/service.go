@@ -14,8 +14,8 @@ type todoService interface {
 	CreateTask(models.Task, int) (int, error)
 	GetTask(int) (models.Task, error)
 	DeleteTask(int) error
-	UpdateTask(int) (models.Task, error)
-	GetTasks() ([]models.Task, error)
+	UpdateTask(int, models.Task) (models.Task, error)
+	GetTasks(id int) ([]models.Task, error)
 }
 
 type Service struct {
