@@ -49,10 +49,9 @@ func (r *TaskRepositoryGorm) GetTask(id int) (models.Task, error) {
 	return task, nil
 }
 
-func (r *TaskRepositoryGorm) GetAllTasks() ([]models.Task, error) {
+func (r *TaskRepositoryGorm) GetTasks() ([]models.Task, error) {
 	return nil, nil
 }
-
 func getByID(id int, db gorm.DB) (models.Task, error) {
 	var task models.Task
 	result := db.Where("id = ?", id).First(&task)

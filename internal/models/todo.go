@@ -8,6 +8,7 @@ type Task struct {
 	Description string   `json:"description"`
 	Category    Category `json:"category"`
 	Tags        []Tag    `gorm:"many2many:user_tags"`
+	UserID      uint
 }
 
 type Tag struct {

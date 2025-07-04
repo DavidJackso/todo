@@ -77,3 +77,7 @@ func (h *Handler) DeleteTask(c *gin.Context) {
 
 	c.JSON(http.StatusOK, "ok")
 }
+
+func (h *Handler) GetAllTask(c *gin.Context) {
+	return
+}

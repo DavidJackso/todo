@@ -48,6 +48,7 @@ func (s *TodoService) UpdateTask(id int) (models.Task, error) {
 	return models.Task{}, nil
 }
 
-func (s *TodoService) GetAllTask() ([]models.Task, error) {
+func (s *TodoService) GetTasks() ([]models.Task, error) {
 	return nil, nil
+
 }
