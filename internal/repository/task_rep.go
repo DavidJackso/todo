@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/DavidJackso/TodoApi/internal/models"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -17,6 +19,8 @@ func NewTaskRepositoryGorm(db *gorm.DB) *TaskRepositoryGorm {
 }
 
 func (r *TaskRepositoryGorm) CreateTask(task models.Task, userID int) (int, error) {
+	r.CreateCategory("aba")
+	fmt.Print(task.CategoryID)
 	task.UserID = uint(userID)
 	result := r.db.Create(&task)
 	if result.Error != nil {
@@ -60,4 +64,23 @@ func getByID(id int, db gorm.DB) (models.Task, error) {
 		return models.Task{}, result.Error
 	}
 	return task, nil
+}
+
+// TODO: remake
+func (r *TaskRepositoryGorm) CreateCategory(title string) {
+	result := r.db.Create(&models.Category{
+		Title: title,
+	})
+	if result.Error != nil {
+		return
+	}
+}
+
+func (r *TaskRepositoryGorm) GetCategoryByID(id int) models.Category {
+	var category models.Category
+	result := r.db.Where("id = ?", id)
+	if result.Error != nil {
+		return models.Category{}
+	}
+	return category
 }
