@@ -19,19 +19,66 @@ func NewTaskRepositoryGorm(dbgorm *gorm.DB) *TaskRepositoryGorm {
 	}
 }
 
+// TODO: переделать
 func (r *TaskRepositoryGorm) CreateTask(task models.Task, userID uint) (uint, error) {
 	task.UserID = userID
 
-	
+	categoryID, err := createCategory(task.CategoryID, task.Category, r.db)
+	if err != nil {
+		return 0, err
+	}
+
+	task.CategoryID = categoryID
+
+	//TODO: вынести в отдельну функцию
+	if len(task.Tags) != 0 {
+		for i, tag := range task.Tags {
+			var existingTag models.Tag
+			if err := r.db.Where("title = ?", tag.Title).First(&existingTag).Error; err != nil {
+				if err == gorm.ErrRecordNotFound {
+					if err := r.db.Create(&tag).Error; err != nil {
+						logrus.WithError(err).Error("error creating tag")
+						return 0, err
+					}
+					task.Tags[i] = tag
+				} else {
+					logrus.WithError(err).Error("error checking tag existence")
+					return 0, err
+				}
+			} else {
+				task.Tags[i] = existingTag
+			}
+		}
+	}
 
 	result := r.db.Create(&task)
 	if result.Error != nil {
-		logrus.WithError(result.Error).Error("Error add new task in gorm")
+		logrus.WithError(result.Error).Error("error add new task")
 		return 0, result.Error
 	}
 	return task.ID, nil
 }
 
+func createCategory(categoryID uint, categoryNew models.Category, db *gorm.DB) (uint, error) {
+	var category models.Category
+	result := db.First(&category, categoryID)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		if categoryNew.ID == 0 {
+			return 0, errs.ErrEmptyCategory
+		}
+		result := db.Create(&categoryNew)
+		if result.Error != nil {
+			logrus.WithError(result.Error).Error("failed create new category")
+			return 0, result.Error
+		}
+		return categoryNew.ID, nil
+	}
+	if result.Error != nil {
+		logrus.WithError(result.Error).Error("failed find category")
+		return 0, result.Error
+	}
+	return categoryID, nil
+}
 
 func (r *TaskRepositoryGorm) DeleteTask(id uint, userID uint) error {
 	task, err := getByID(id, r.db)
@@ -69,7 +116,7 @@ func (r *TaskRepositoryGorm) UpdateTask(id uint, userID uint, updTask models.Tas
 		}).Warn("access denied")
 		return models.Task{}, errs.ErrAccessDenied
 	}
-
+	//TODO: переделать
 	oldTask.Title = updTask.Title
 	oldTask.Description = updTask.Description
 	oldTask.CategoryID = updTask.CategoryID
@@ -85,7 +132,7 @@ func (r *TaskRepositoryGorm) UpdateTask(id uint, userID uint, updTask models.Tas
 
 func (r *TaskRepositoryGorm) GetTask(id uint, userID uint) (models.Task, error) {
 	var task models.Task
-	result := r.db.Preload("Tag").Preload("Category").First(&task, id)
+	result := r.db.Preload("Tags").Preload("Category").First(&task, id)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		logrus.Error("task not found")
@@ -124,24 +171,4 @@ func getByID(id uint, db *gorm.DB) (models.Task, error) {
 		return models.Task{}, result.Error
 	}
 	return task, nil
-}
-
-// TODO: remake
-func (r *TaskRepositoryGorm) CreateCategory(title string) {
-	result := r.db.Create(&models.Category{
-		Title: title,
-	})
-	if result.Error != nil {
-		return
-	}
-}
-
-// TODO: remake
-func (r *TaskRepositoryGorm) GetCategoryByID(id uint) models.Category {
-	var category models.Category
-	result := r.db.Where("id = ?", id).First(&category)
-	if result.Error != nil {
-		return models.Category{}
-	}
-	return category
 }

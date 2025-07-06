@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/DavidJackso/TodoApi/internal/lib/errs"
 	"github.com/DavidJackso/TodoApi/internal/models"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -36,7 +38,6 @@ func (h *Handler) CreateTask(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
 
-// TODO: добавить обработку ошибки задача не найдена
 func (h *Handler) GetTask(c *gin.Context) {
 	id, err := getTaskID(c)
 
@@ -53,10 +54,17 @@ func (h *Handler) GetTask(c *gin.Context) {
 
 	task, err := h.service.GetTask(id, userID)
 	if err != nil {
+		if errors.Is(err, errs.ErrAccessDenied) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+			return
+		}
+		if errors.Is(err, errs.ErrTaskNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "task not found by id"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed get task"})
 		return
 	}
-
 	c.JSON(http.StatusOK, task)
 
 }
@@ -77,6 +85,14 @@ func (h *Handler) DeleteTask(c *gin.Context) {
 
 	err = h.service.DeleteTask(id, userID)
 	if err != nil {
+		if errors.Is(err, errs.ErrAccessDenied) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+			return
+		}
+		if errors.Is(err, errs.ErrTaskNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "task not found by id"})
+			return
+		}
 		logrus.WithError(err).Error("failed delete task")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed delete task"})
 		return
@@ -125,6 +141,14 @@ func (h *Handler) UpdateTask(c *gin.Context) {
 	task, err := h.service.UpdateTask(id, userID, taskUpd)
 
 	if err != nil {
+		if errors.Is(err, errs.ErrAccessDenied) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+			return
+		}
+		if errors.Is(err, errs.ErrTaskNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "task not found by id"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed update task"})
 		return
 	}

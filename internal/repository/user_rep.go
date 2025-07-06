@@ -40,8 +40,8 @@ func getUserByID(id uint, db *gorm.DB) (models.User, error) {
 
 func (r *UserRepositoryGorm) CreateUser(user models.User) (uint, error) {
 	result := r.db.Create(&user)
-	if result.Error == gorm.ErrDuplicatedKey {
-		return 0, errs.ErrEmailIsReady
+	if errs.IsDuplicateError(result.Error) {
+		return 0, errs.ErrEmailIsAlreadyExists
 	}
 	return user.ID, result.Error
 }
@@ -51,7 +51,7 @@ func (r *UserRepositoryGorm) GetUser(email, password string) (models.User, error
 
 	result := r.db.Where("email=?", email).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return user, errs.ErrInvaliEmailOrPassword
+		return user, errs.ErrInvalidEmailOrPassword
 	}
 
 	return user, result.Error

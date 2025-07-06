@@ -12,7 +12,6 @@ import (
 
 const authorization = "Authorization"
 
-// TODO: хуево работает
 func (h *Handler) UserIdentity(c *gin.Context) {
 	header := c.GetHeader(authorization)
 	if header == "" {

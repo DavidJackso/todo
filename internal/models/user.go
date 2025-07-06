@@ -8,6 +8,6 @@ type User struct {
 	gorm.Model
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required,email" gorm:"unique"`
-	Password string `json:"password" binding:"required,min=6`
+	Password string `json:"password" binding:"required,min=6"`
 	Tasks    []Task `json:"tasks"`
 }
