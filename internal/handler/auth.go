@@ -7,32 +7,23 @@ import (
 	"github.com/DavidJackso/TodoApi/internal/lib/errs"
 	"github.com/DavidJackso/TodoApi/internal/models"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func (h *Handler) signUp(c *gin.Context) {
 	var user models.User
 	err := c.Bind(&user)
 	if err != nil {
-		logrus.Info("bad request", err)
-		c.JSON(http.StatusBadRequest, map[string]int{
-			"id": 0,
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse request body"})
 		return
 	}
+
 	id, err := h.service.CreateNewUser(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]int{
-			"id": 0,
-		})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
 		return
 	}
 
-	logrus.Info("Success sign up")
-
-	c.JSON(http.StatusOK, map[string]int{
-		"id": id,
-	})
+	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
 
 type signInInput struct {
@@ -44,23 +35,20 @@ func (h *Handler) signIn(c *gin.Context) {
 	var input signInInput
 	err := c.Bind(&input)
 	if err != nil {
-		logrus.Info("bad request", err)
-		c.JSON(http.StatusBadRequest, "bad request")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse request body"})
+		return
 	}
 
 	jwt, err := h.service.GenerateToken(input.Email, input.Password)
-	if errors.Is(err, errs.ErrInvaliEmailorPassword) {
-		c.JSON(http.StatusBadRequest, "invalid email or password")
+	if errors.Is(err, errs.ErrInvaliEmailOrPassword) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid email or password"})
 		return
 	}
 
 	if err != nil {
-		logrus.Error(err)
-		c.JSON(http.StatusInternalServerError, "bad day")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate jwt token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"token": jwt,
-	})
+	c.JSON(http.StatusOK, gin.H{"jwt": jwt})
 }

@@ -6,19 +6,19 @@ import (
 )
 
 type UserRepository interface {
-	CreateUser(models.User) (int, error)
-	DeleteUser(int) error
+	CreateUser(models.User) (uint, error)
+	DeleteUser(uint) error
 	GetUser(string, string) (models.User, error)
-	GetUserByID(int) (models.User, error)
-	UpdateUser(int, models.User) (models.User, error)
+	GetUserByID(uint) (models.User, error)
+	UpdateUser(uint, models.User) (models.User, error)
 }
 
 type TaskRepository interface {
-	CreateTask(models.Task, int) (int, error)
-	GetTask(id int) (models.Task, error)
-	DeleteTask(int) error
-	UpdateTask(int, models.Task) (models.Task, error)
-	GetTasks(int) ([]models.Task, error)
+	CreateTask(models.Task, uint) (uint, error)
+	GetTask(uint, uint) (models.Task, error)
+	DeleteTask(uint, uint) error
+	UpdateTask(uint, uint, models.Task) (models.Task, error)
+	GetTasks(uint) ([]models.Task, error)
 }
 
 type Repository struct {

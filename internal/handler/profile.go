@@ -11,24 +11,24 @@ func (h *Handler) DeleteProfile(c *gin.Context) {
 	id, err := getUserID(c)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, "none useID")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
 		return
 	}
 
 	err = h.service.DeleteProfile(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, "")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete account"})
 		return
 	}
 
-	c.JSON(http.StatusOK, "completed")
+	c.JSON(http.StatusOK, "account succes deleted")
 }
 
 func (h *Handler) UpdateProfile(c *gin.Context) {
 	id, err := getUserID(c)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, "none useID")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
 		return
 	}
 
@@ -37,13 +37,13 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 	err = c.Bind(&newUser)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "failed decode body")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse request body"})
 		return
 	}
 
 	updateUser, err := h.service.UpdateProfile(id, newUser)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, "failed update user")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update profile"})
 		return
 	}
 

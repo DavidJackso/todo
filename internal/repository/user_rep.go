@@ -18,7 +18,7 @@ func NewUserRepositoryGorm(dbgorm *gorm.DB) *UserRepositoryGorm {
 	}
 }
 
-func (r *UserRepositoryGorm) GetUserByID(id int) (models.User, error) {
+func (r *UserRepositoryGorm) GetUserByID(id uint) (models.User, error) {
 	user, err := getUserByID(id, r.db)
 	if err != nil {
 		return models.User{}, err
@@ -26,7 +26,7 @@ func (r *UserRepositoryGorm) GetUserByID(id int) (models.User, error) {
 	return user, nil
 }
 
-func getUserByID(id int, db *gorm.DB) (models.User, error) {
+func getUserByID(id uint, db *gorm.DB) (models.User, error) {
 	var user models.User
 
 	result := db.Where("id = ?", id).Find(&user)
@@ -38,9 +38,12 @@ func getUserByID(id int, db *gorm.DB) (models.User, error) {
 	return user, nil
 }
 
-func (r *UserRepositoryGorm) CreateUser(user models.User) (int, error) {
+func (r *UserRepositoryGorm) CreateUser(user models.User) (uint, error) {
 	result := r.db.Create(&user)
-	return int(user.ID), result.Error
+	if result.Error == gorm.ErrDuplicatedKey {
+		return 0, errs.ErrEmailIsReady
+	}
+	return user.ID, result.Error
 }
 
 func (r *UserRepositoryGorm) GetUser(email, password string) (models.User, error) {
@@ -48,13 +51,13 @@ func (r *UserRepositoryGorm) GetUser(email, password string) (models.User, error
 
 	result := r.db.Where("email=?", email).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return user, errs.ErrInvaliEmailorPassword
+		return user, errs.ErrInvaliEmailOrPassword
 	}
 
 	return user, result.Error
 }
 
-func (r *UserRepositoryGorm) DeleteUser(id int) error {
+func (r *UserRepositoryGorm) DeleteUser(id uint) error {
 	user, err := getUserByID(id, r.db)
 	if err != nil {
 		return err
@@ -66,14 +69,14 @@ func (r *UserRepositoryGorm) DeleteUser(id int) error {
 	return nil
 }
 
-func (r *UserRepositoryGorm) UpdateUser(id int, user models.User) (models.User, error) {
+func (r *UserRepositoryGorm) UpdateUser(id uint, user models.User) (models.User, error) {
 	oldUser, err := getUserByID(id, r.db)
 	if err != nil {
 		return models.User{}, err
 	}
 	oldUser.Email = user.Email
 	oldUser.Password = user.Password
-	oldUser.UserName = user.UserName
+	oldUser.Name = user.Name
 	result := r.db.Save(&oldUser)
 	if result.Error != nil {
 		return models.User{}, err

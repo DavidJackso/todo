@@ -18,9 +18,10 @@ func main() {
 
 	db := database.ConnectToDb()
 	db.AutoMigrate(&models.User{}, &models.Task{}, &models.Category{}, &models.Tag{})
+
 	repository := repository.NewRepository(db)
 	service := service.NewService(repository)
-	handler := Handler.NewHanlder(service)
+	handler := Handler.NewHandler(service)
 	router := handler.InitRouting()
 
 	//TODO: Move to config

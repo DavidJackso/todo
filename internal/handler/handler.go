@@ -6,10 +6,10 @@ import (
 )
 
 type Handler struct {
-	service *service.Service
+	service *service.Services
 }
 
-func NewHanlder(s *service.Service) Handler {
+func NewHandler(s *service.Services) Handler {
 	return Handler{
 		service: s,
 	}
@@ -32,7 +32,7 @@ func (h *Handler) InitRouting() *gin.Engine {
 			user.DELETE("/", h.DeleteProfile)
 		}
 
-		tasks := api.Group("/task")
+		tasks := api.Group("/tasks")
 		{
 			tasks.POST("/", h.CreateTask)
 			tasks.GET("/", h.GetTasks)
@@ -40,6 +40,7 @@ func (h *Handler) InitRouting() *gin.Engine {
 			tasks.PATCH("/:id", h.UpdateTask)
 			tasks.DELETE("/:id", h.DeleteTask)
 		}
+
 	}
 	return router
 }

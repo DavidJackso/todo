@@ -16,27 +16,31 @@ func NewProfileService(repository *repository.Repository) *ProfileService {
 	}
 }
 
-func (s *ProfileService) GetProfile(id int) (models.User, error) {
-	user, err := s.rep.GetUserByID(id)
+// TODO: небезопасно
+func (s *ProfileService) GetProfile(userID uint) (models.User, error) {
+	user, err := s.rep.GetUserByID(userID)
 	if err != nil {
-		logrus.Error(err)
+		logrus.WithError(err).Error("failed to get profile")
 		return models.User{}, err
 	}
 	return user, nil
 }
 
-func (s *ProfileService) DeleteProfile(id int) error {
+// TODO: небезопасно
+func (s *ProfileService) DeleteProfile(id uint) error {
 	err := s.rep.DeleteUser(id)
 	if err != nil {
-		logrus.Error(err)
+		logrus.WithError(err).Error("failed to delete profile")
+		return err
 	}
 	return nil
 }
 
-func (s *ProfileService) UpdateProfile(id int, user models.User) (models.User, error) {
+func (s *ProfileService) UpdateProfile(id uint, user models.User) (models.User, error) {
 	newUser, err := s.rep.UpdateUser(id, user)
 	if err != nil {
-		logrus.Error(err)
+		logrus.WithError(err).Error("failed to update profile")
+		return models.User{}, err
 	}
 	return newUser, nil
 }

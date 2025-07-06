@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 
@@ -30,16 +31,18 @@ func NewAuthorizationService(db *repository.Repository) *AuthorizationService {
 	}
 }
 
-func (s *AuthorizationService) CreateNewUser(user models.User) (int, error) {
+func (s *AuthorizationService) CreateNewUser(user models.User) (uint, error) {
 	user.Password = generateHash(user.Password)
 	id, err := s.rep.CreateUser(user)
+
 	if err != nil {
+		logrus.WithError(err).Error("failed create user")
 		return 0, err
 	}
 	return id, nil
 }
 
-func (s *AuthorizationService) ParseToken(tokenString string) (int, error) {
+func (s *AuthorizationService) ParseToken(tokenString string) (uint, error) {
 	claims := jwt.MapClaims{}
 	_, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -51,12 +54,13 @@ func (s *AuthorizationService) ParseToken(tokenString string) (int, error) {
 		return 0, err
 	}
 
-	idFloat, ok := claims["id"].(float64)
+	id, ok := claims["user_id"].(float64)
 	if !ok {
+		fmt.Print(id)
 		return 0, errors.New("invalid token payload")
 	}
 
-	return int(idFloat), nil
+	return uint(id), nil
 }
 
 func (s *AuthorizationService) GenerateToken(email, password string) (string, error) {
@@ -67,8 +71,11 @@ func (s *AuthorizationService) GenerateToken(email, password string) (string, er
 	}
 
 	tokenClaims := jwt.MapClaims{
-		"id": user.ID,
+		"user_id": user.ID,
+		"exp":     time.Now().Add(tokenTTL).Unix(),
+		"iat":     time.Now().Unix(),
 	}
+	fmt.Print(tokenClaims)
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaims).SignedString([]byte(signingKey))
 	if err != nil {
 		logrus.Error(err)
