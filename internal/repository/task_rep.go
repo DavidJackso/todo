@@ -85,7 +85,7 @@ func createCategory(categoryID uint, categoryNew models.Category, db *gorm.DB) (
 func (r *TaskRepositoryGorm) DeleteTask(id uint, userID uint) error {
 	task, err := getByID(id, r.db)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		logrus.Error("task not found")
+		logrus.Info("task not found")
 		return errs.ErrTaskNotFound
 	}
 	if task.UserID != userID {
@@ -107,7 +107,7 @@ func (r *TaskRepositoryGorm) UpdateTask(id uint, userID uint, updTask models.Tas
 	oldTask, err := getByID(id, r.db)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		logrus.Error("task not found")
+		logrus.Info("task not found")
 		return models.Task{}, errs.ErrTaskNotFound
 	}
 
