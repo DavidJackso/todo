@@ -21,7 +21,7 @@ func (h *Handler) DeleteProfile(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, "account succes deleted")
+	c.JSON(http.StatusOK, "account success deleted")
 }
 
 func (h *Handler) UpdateProfile(c *gin.Context) {

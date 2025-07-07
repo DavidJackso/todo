@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/DavidJackso/TodoApi/internal/models"
@@ -14,25 +16,29 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TODO: Вынести в env
-const salt = "spf"
-const signingKey = "avbnggfdcc"
-
-// TODO: Вынести в конфиг
-const tokenTTL = 12 * time.Hour
-
 type AuthorizationService struct {
-	rep *repository.Repository
+	rep        *repository.Repository
+	salt       string
+	signingKey string
+	tokenTTL   time.Duration
 }
 
 func NewAuthorizationService(db *repository.Repository) *AuthorizationService {
+	ttl, err := strconv.Atoi(os.Getenv("TOKEN_TTL"))
+	if err != nil {
+		ttl = 6
+	}
+
 	return &AuthorizationService{
-		rep: db,
+		rep:        db,
+		salt:       os.Getenv("SALT"),
+		signingKey: os.Getenv("SIGNING_KEY"),
+		tokenTTL:   time.Duration(ttl) * time.Hour,
 	}
 }
 
 func (s *AuthorizationService) CreateNewUser(user models.User) (uint, error) {
-	user.Password = generateHash(user.Password)
+	user.Password = generateHash(user.Password, s.salt)
 	id, err := s.rep.CreateUser(user)
 
 	if err != nil {
@@ -48,7 +54,7 @@ func (s *AuthorizationService) ParseToken(tokenString string) (uint, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
 		}
-		return []byte(signingKey), nil
+		return []byte(s.signingKey), nil
 	})
 	if err != nil {
 		return 0, err
@@ -64,7 +70,7 @@ func (s *AuthorizationService) ParseToken(tokenString string) (uint, error) {
 }
 
 func (s *AuthorizationService) GenerateToken(email, password string) (string, error) {
-	user, err := s.rep.GetUser(email, generateHash(password))
+	user, err := s.rep.GetUser(email, generateHash(password, s.salt))
 	if err != nil {
 		logrus.Error(err)
 		return "", err
@@ -72,18 +78,18 @@ func (s *AuthorizationService) GenerateToken(email, password string) (string, er
 
 	tokenClaims := jwt.MapClaims{
 		"user_id": user.ID,
-		"exp":     time.Now().Add(tokenTTL).Unix(),
+		"exp":     time.Now().Add(s.tokenTTL).Unix(),
 		"iat":     time.Now().Unix(),
 	}
 	fmt.Print(tokenClaims)
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaims).SignedString([]byte(signingKey))
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaims).SignedString([]byte(s.signingKey))
 	if err != nil {
 		logrus.Error(err)
 	}
 	return token, err
 }
 
-func generateHash(password string) string {
+func generateHash(password, salt string) string {
 	h := md5.New()
 	io.WriteString(h, password)
 	io.WriteString(h, salt)

@@ -28,9 +28,10 @@ func (r *TaskRepositoryGorm) CreateTask(task models.Task, userID uint) (uint, er
 		return 0, err
 	}
 
+	logrus.Error(categoryID)
 	task.CategoryID = categoryID
 
-	//TODO: вынести в отдельну функцию
+	//TODO: вынести в отдельную функцию
 	if len(task.Tags) != 0 {
 		for i, tag := range task.Tags {
 			var existingTag models.Tag
@@ -63,7 +64,8 @@ func createCategory(categoryID uint, categoryNew models.Category, db *gorm.DB) (
 	var category models.Category
 	result := db.First(&category, categoryID)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		if categoryNew.ID == 0 {
+		if categoryNew.Title == "" {
+			logrus.WithError(result.Error).Error("empty catalog")
 			return 0, errs.ErrEmptyCategory
 		}
 		result := db.Create(&categoryNew)

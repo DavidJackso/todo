@@ -41,7 +41,7 @@ func (h *Handler) UserIdentity(c *gin.Context) {
 func getUserID(c *gin.Context) (uint, error) {
 	id, ok := c.Get("userID")
 	if !ok {
-		return 0, errors.New("failde get userID")
+		return 0, errors.New("failed get userID")
 	}
 
 	return id.(uint), nil
