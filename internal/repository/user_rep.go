@@ -75,7 +75,6 @@ func (r *UserRepositoryGorm) UpdateUser(id uint, user models.User) (models.User,
 		return models.User{}, err
 	}
 
-	updFileds
 	oldUser.Email = user.Email
 	oldUser.Password = user.Password
 	oldUser.Name = user.Name
