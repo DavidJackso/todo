@@ -46,11 +46,10 @@ func main() {
 	done := make(chan os.Signal, 1)
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil {
-			logrus.Fatalf("failed start server:%v", err)
-		}
+		srv.ListenAndServe()
 		logrus.Info("Server started")
 	}()
+	logrus.Info("Server started")
 
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
 	<-done
