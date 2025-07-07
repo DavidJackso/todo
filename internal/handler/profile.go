@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/DavidJackso/TodoApi/internal/models"
@@ -35,6 +36,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 	var newUser models.User
 
 	err = c.Bind(&newUser)
+	fmt.Print(err)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse request body"})

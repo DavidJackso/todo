@@ -5,6 +5,7 @@ import (
 
 	"github.com/DavidJackso/TodoApi/internal/lib/errs"
 	"github.com/DavidJackso/TodoApi/internal/models"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -75,12 +76,22 @@ func (r *UserRepositoryGorm) UpdateUser(id uint, user models.User) (models.User,
 		return models.User{}, err
 	}
 
-	oldUser.Email = user.Email
-	oldUser.Password = user.Password
-	oldUser.Name = user.Name
-	result := r.db.Save(&oldUser)
-	if result.Error != nil {
-		return models.User{}, err
+	updFields := map[string]interface{}{}
+	if user.Email != "" {
+		updFields["email"] = user.Email
 	}
+	if user.Name != "" {
+		updFields["name"] = user.Name
+	}
+	if user.Password != "" {
+		updFields["password"] = user.Password
+	}
+
+	result := r.db.Model(&oldUser).Updates(updFields)
+	if result.Error != nil {
+		logrus.WithError(result.Error).Error("failed update profile")
+		return models.User{}, result.Error
+	}
+	oldUser, _ = getUserByID(id, r.db)
 	return oldUser, nil
 }

@@ -167,7 +167,7 @@ func (r *TaskRepositoryGorm) GetTask(id uint, userID uint) (models.Task, error) 
 
 func (r *TaskRepositoryGorm) GetTasks(userID uint) ([]models.Task, error) {
 	var tasks []models.Task
-	result := r.db.Preload("Category").Preload("Tag").Where("user_id = ?", userID).Find(&tasks)
+	result := r.db.Preload("Category").Preload("Tags").Where("user_id = ?", userID).Find(&tasks)
 	if result.Error != nil {
 		logrus.WithError(result.Error).Error("failed get tasks")
 		return nil, result.Error
