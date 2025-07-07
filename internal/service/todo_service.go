@@ -7,7 +7,6 @@ import (
 )
 
 // TODO: добавить валидацию данных
-// TODO: улучшить логирование
 type TodoService struct {
 	rep *repository.Repository
 }
@@ -48,6 +47,7 @@ func (s *TodoService) DeleteTask(id uint, userID uint) error {
 func (s *TodoService) UpdateTask(id, userID uint, updTask models.Task) (models.Task, error) {
 	task, err := s.rep.UpdateTask(id, userID, updTask)
 	if err != nil {
+		logrus.WithError(err).Error("failed update task")
 		return models.Task{}, err
 	}
 	return task, nil

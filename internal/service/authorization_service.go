@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -62,7 +61,7 @@ func (s *AuthorizationService) ParseToken(tokenString string) (uint, error) {
 
 	id, ok := claims["user_id"].(float64)
 	if !ok {
-		fmt.Print(id)
+		logrus.Error("failed get user id")
 		return 0, errors.New("invalid token payload")
 	}
 
@@ -81,10 +80,9 @@ func (s *AuthorizationService) GenerateToken(email, password string) (string, er
 		"exp":     time.Now().Add(s.tokenTTL).Unix(),
 		"iat":     time.Now().Unix(),
 	}
-	fmt.Print(tokenClaims)
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaims).SignedString([]byte(s.signingKey))
 	if err != nil {
-		logrus.Error(err)
+		logrus.WithError(err).Error("failed create jwt claims")
 	}
 	return token, err
 }
