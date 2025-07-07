@@ -69,7 +69,7 @@ func (s *AuthorizationService) ParseToken(tokenString string) (uint, error) {
 }
 
 func (s *AuthorizationService) GenerateToken(email, password string) (string, error) {
-	user, err := s.rep.GetUser(email, generateHash(password, s.salt))
+	user, err := s.rep.GetUserByEmailAndPassword(email, generateHash(password, s.salt))
 	if err != nil {
 		logrus.Error(err)
 		return "", err

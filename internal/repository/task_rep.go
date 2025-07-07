@@ -5,7 +5,6 @@ import (
 
 	"github.com/DavidJackso/TodoApi/internal/lib/errs"
 	"github.com/DavidJackso/TodoApi/internal/models"
-	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -28,7 +27,6 @@ func (r *TaskRepositoryGorm) CreateTask(task models.Task, userID uint) (uint, er
 		return 0, err
 	}
 
-	logrus.Error(categoryID)
 	task.CategoryID = categoryID
 
 	//TODO: вынести в отдельную функцию
@@ -38,12 +36,10 @@ func (r *TaskRepositoryGorm) CreateTask(task models.Task, userID uint) (uint, er
 			if err := r.db.Where("title = ?", tag.Title).First(&existingTag).Error; err != nil {
 				if err == gorm.ErrRecordNotFound {
 					if err := r.db.Create(&tag).Error; err != nil {
-						logrus.WithError(err).Error("error creating tag")
 						return 0, err
 					}
 					task.Tags[i] = tag
 				} else {
-					logrus.WithError(err).Error("error checking tag existence")
 					return 0, err
 				}
 			} else {
@@ -54,7 +50,6 @@ func (r *TaskRepositoryGorm) CreateTask(task models.Task, userID uint) (uint, er
 
 	result := r.db.Create(&task)
 	if result.Error != nil {
-		logrus.WithError(result.Error).Error("error add new task")
 		return 0, result.Error
 	}
 	return task.ID, nil
@@ -65,18 +60,15 @@ func createCategory(categoryID uint, categoryNew models.Category, db *gorm.DB) (
 	result := db.First(&category, categoryID)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		if categoryNew.Title == "" {
-			logrus.WithError(result.Error).Error("empty catalog")
 			return 0, errs.ErrEmptyCategory
 		}
 		result := db.Create(&categoryNew)
 		if result.Error != nil {
-			logrus.WithError(result.Error).Error("failed create new category")
 			return 0, result.Error
 		}
 		return categoryNew.ID, nil
 	}
 	if result.Error != nil {
-		logrus.WithError(result.Error).Error("failed find category")
 		return 0, result.Error
 	}
 	return categoryID, nil
@@ -85,19 +77,13 @@ func createCategory(categoryID uint, categoryNew models.Category, db *gorm.DB) (
 func (r *TaskRepositoryGorm) DeleteTask(id uint, userID uint) error {
 	task, err := getByID(id, r.db)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		logrus.Info("task not found")
 		return errs.ErrTaskNotFound
 	}
 	if task.UserID != userID {
-		logrus.WithFields(logrus.Fields{
-			"user_id":  userID,
-			"owner_id": task.UserID,
-		}).Warn("access denied")
 		return errs.ErrAccessDenied
 	}
 	result := r.db.Delete(&task)
 	if result.Error != nil {
-		logrus.WithError(result.Error).Error("failed delete task")
 		return result.Error
 	}
 	return nil
@@ -107,15 +93,10 @@ func (r *TaskRepositoryGorm) UpdateTask(id uint, userID uint, updTask models.Tas
 	oldTask, err := getByID(id, r.db)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		logrus.Info("task not found")
 		return models.Task{}, errs.ErrTaskNotFound
 	}
 
 	if oldTask.UserID != userID {
-		logrus.WithFields(logrus.Fields{
-			"user_id":  userID,
-			"owner_id": oldTask.UserID,
-		}).Warn("access denied")
 		return models.Task{}, errs.ErrAccessDenied
 	}
 
@@ -130,10 +111,8 @@ func (r *TaskRepositoryGorm) UpdateTask(id uint, userID uint, updTask models.Tas
 		updateFields["category_id"] = updTask.CategoryID
 	}
 
-	r.db.Model(&oldTask).Updates(updateFields)
-	result := r.db.Save(&oldTask)
+	result := r.db.Model(&oldTask).Updates(updateFields)
 	if result.Error != nil {
-		logrus.WithError(result.Error).Error("failed update task")
 		return models.Task{}, result.Error
 	}
 
@@ -145,20 +124,14 @@ func (r *TaskRepositoryGorm) GetTask(id uint, userID uint) (models.Task, error) 
 	result := r.db.Preload("Tags").Preload("Category").First(&task, id)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		logrus.Error("task not found")
 		return models.Task{}, errs.ErrTaskNotFound
 	}
 
 	if task.UserID != userID {
-		logrus.WithFields(logrus.Fields{
-			"user_id":  userID,
-			"owner_id": task.UserID,
-		}).Warn("access denied")
 		return models.Task{}, errs.ErrAccessDenied
 	}
 
 	if result.Error != nil {
-		logrus.WithError(result.Error).Error("failed get task")
 		return models.Task{}, result.Error
 	}
 
@@ -169,7 +142,6 @@ func (r *TaskRepositoryGorm) GetTasks(userID uint) ([]models.Task, error) {
 	var tasks []models.Task
 	result := r.db.Preload("Category").Preload("Tags").Where("user_id = ?", userID).Find(&tasks)
 	if result.Error != nil {
-		logrus.WithError(result.Error).Error("failed get tasks")
 		return nil, result.Error
 	}
 	return tasks, nil

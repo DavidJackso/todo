@@ -5,7 +5,6 @@ import (
 
 	"github.com/DavidJackso/TodoApi/internal/lib/errs"
 	"github.com/DavidJackso/TodoApi/internal/models"
-	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -30,7 +29,7 @@ func (r *UserRepositoryGorm) GetUserByID(id uint) (models.User, error) {
 func getUserByID(id uint, db *gorm.DB) (models.User, error) {
 	var user models.User
 
-	result := db.Where("id = ?", id).Find(&user)
+	result := db.Where("id = ?", id).First(&user)
 
 	if result.Error != nil {
 		return models.User{}, result.Error
@@ -41,18 +40,26 @@ func getUserByID(id uint, db *gorm.DB) (models.User, error) {
 
 func (r *UserRepositoryGorm) CreateUser(user models.User) (uint, error) {
 	result := r.db.Create(&user)
-	if errs.IsDuplicateError(result.Error) {
-		return 0, errs.ErrEmailIsAlreadyExists
+
+	if result.Error != nil {
+		if errs.IsDuplicateError(result.Error) {
+			return 0, errs.ErrEmailIsAlreadyExists
+		}
+		return 0, result.Error
 	}
+
 	return user.ID, result.Error
 }
 
-func (r *UserRepositoryGorm) GetUser(email, password string) (models.User, error) {
+func (r *UserRepositoryGorm) GetUserByEmailAndPassword(email, password string) (models.User, error) {
 	var user models.User
 
-	result := r.db.Where("email=?", email).First(&user)
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return user, errs.ErrInvalidEmailOrPassword
+	result := r.db.Where("email=? AND password", email, password).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return user, errs.ErrInvalidEmailOrPassword
+		}
+		return user, result.Error
 	}
 
 	return user, result.Error
@@ -89,7 +96,6 @@ func (r *UserRepositoryGorm) UpdateUser(id uint, user models.User) (models.User,
 
 	result := r.db.Model(&oldUser).Updates(updFields)
 	if result.Error != nil {
-		logrus.WithError(result.Error).Error("failed update profile")
 		return models.User{}, result.Error
 	}
 	oldUser, _ = getUserByID(id, r.db)

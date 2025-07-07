@@ -8,7 +8,7 @@ import (
 type UserRepository interface {
 	CreateUser(models.User) (uint, error)
 	DeleteUser(uint) error
-	GetUser(string, string) (models.User, error)
+	GetUserByEmailAndPassword(string, string) (models.User, error)
 	GetUserByID(uint) (models.User, error)
 	UpdateUser(uint, models.User) (models.User, error)
 }
