@@ -20,6 +20,6 @@ type Tag struct {
 
 type Category struct {
 	gorm.Model
-	Title string `json:"title" gorm:"unique"`
+	Title string `json:"title"`
 	Tasks []Task
 }
