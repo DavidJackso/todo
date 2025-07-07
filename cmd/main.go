@@ -28,7 +28,7 @@ func main() {
 
 	cfg := config.SetupConfig()
 
-	db := database.ConnectToDb(cfg)
+	db := database.ConnectToDb(&cfg.DBConfig)
 	db.AutoMigrate(&models.User{}, &models.Task{}, &models.Category{}, &models.Tag{})
 
 	repository := repository.NewRepository(db)

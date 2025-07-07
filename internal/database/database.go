@@ -9,14 +9,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func ConnectToDb(cfg *config.Config) *gorm.DB {
+func ConnectToDb(cfg *config.DBConfig) *gorm.DB {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
-		cfg.DBConfig.Address,
-		cfg.DBConfig.User,
+		cfg.Address,
+		cfg.User,
 		os.Getenv("POSTGRES_PASSWORD"),
-		cfg.DBConfig.Name,
-		cfg.DBConfig.Port,
+		cfg.Name,
+		cfg.Port,
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

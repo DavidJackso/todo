@@ -9,7 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TODO: добавить валидацию данных
 type TodoService struct {
 	rep *repository.Repository
 }

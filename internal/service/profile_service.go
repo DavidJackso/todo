@@ -16,7 +16,6 @@ func NewProfileService(repository *repository.Repository) *ProfileService {
 	}
 }
 
-// TODO: небезопасно
 func (s *ProfileService) GetProfile(userID uint) (models.User, error) {
 	user, err := s.rep.GetUserByID(userID)
 	if err != nil {
@@ -26,7 +25,6 @@ func (s *ProfileService) GetProfile(userID uint) (models.User, error) {
 	return user, nil
 }
 
-// TODO: небезопасно
 func (s *ProfileService) DeleteProfile(id uint) error {
 	err := s.rep.DeleteUser(id)
 	if err != nil {
