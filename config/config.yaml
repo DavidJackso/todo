@@ -8,5 +8,4 @@ db:
   address: "localhost"
   port: 5433
   user: "postgres"
-  password: "12332187"
   name: "postgres"

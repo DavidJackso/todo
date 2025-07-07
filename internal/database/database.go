@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/DavidJackso/TodoApi/internal/config"
 	"gorm.io/driver/postgres"
@@ -13,7 +14,7 @@ func ConnectToDb(cfg *config.Config) *gorm.DB {
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
 		cfg.DBConfig.Address,
 		cfg.DBConfig.User,
-		cfg.DBConfig.Password,
+		os.Getenv("POSTGRES_PASSWORD"),
 		cfg.DBConfig.Name,
 		cfg.DBConfig.Port,
 	)

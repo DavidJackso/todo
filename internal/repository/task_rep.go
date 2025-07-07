@@ -118,11 +118,19 @@ func (r *TaskRepositoryGorm) UpdateTask(id uint, userID uint, updTask models.Tas
 		}).Warn("access denied")
 		return models.Task{}, errs.ErrAccessDenied
 	}
-	//TODO: переделать
-	oldTask.Title = updTask.Title
-	oldTask.Description = updTask.Description
-	oldTask.CategoryID = updTask.CategoryID
 
+	updateFields := map[string]interface{}{}
+	if updTask.Title != "" {
+		updateFields["title"] = updTask.Title
+	}
+	if updTask.Description != "" {
+		updateFields["description"] = updTask.Description
+	}
+	if updTask.CategoryID != 0 {
+		updateFields["category_id"] = updTask.CategoryID
+	}
+
+	r.db.Model(&oldTask).Updates(updateFields)
 	result := r.db.Save(&oldTask)
 	if result.Error != nil {
 		logrus.WithError(result.Error).Error("failed update task")
