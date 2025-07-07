@@ -15,7 +15,7 @@ type Task struct {
 type Tag struct {
 	gorm.Model
 	Title string `json:"title" binding:"required"`
-	Tasks []Task `json:"tasks" gorm:"many2many:task_tags"`
+	Tasks []Task `json:"-" gorm:"many2many:task_tags"`
 }
 
 type Category struct {

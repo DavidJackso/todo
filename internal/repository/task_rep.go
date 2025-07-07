@@ -18,60 +18,58 @@ func NewTaskRepositoryGorm(dbgorm *gorm.DB) *TaskRepositoryGorm {
 	}
 }
 
-// TODO: переделать
 func (r *TaskRepositoryGorm) CreateTask(task models.Task, userID uint) (uint, error) {
 	task.UserID = userID
 
-	categoryID, err := createCategory(task.CategoryID, task.Category, r.db)
+	categoryID, err := r.ensureCategory(task.CategoryID, task.Category)
 	if err != nil {
 		return 0, err
 	}
-
 	task.CategoryID = categoryID
 
-	//TODO: вынести в отдельную функцию
-	if len(task.Tags) != 0 {
-		for i, tag := range task.Tags {
-			var existingTag models.Tag
-			if err := r.db.Where("title = ?", tag.Title).First(&existingTag).Error; err != nil {
-				if err == gorm.ErrRecordNotFound {
-					if err := r.db.Create(&tag).Error; err != nil {
-						return 0, err
-					}
-					task.Tags[i] = tag
-				} else {
-					return 0, err
-				}
-			} else {
-				task.Tags[i] = existingTag
-			}
-		}
+	tags, err := r.ensureTags(task.Tags)
+	if err != nil {
+		return 0, err
 	}
+	task.Tags = tags
 
-	result := r.db.Create(&task)
-	if result.Error != nil {
-		return 0, result.Error
+	if err := r.db.Create(&task).Error; err != nil {
+		return 0, err
 	}
 	return task.ID, nil
 }
 
-func createCategory(categoryID uint, categoryNew models.Category, db *gorm.DB) (uint, error) {
-	var category models.Category
-	result := db.First(&category, categoryID)
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		if categoryNew.Title == "" {
-			return 0, errs.ErrEmptyCategory
+func (r *TaskRepositoryGorm) ensureCategory(categoryID uint, category models.Category) (uint, error) {
+	if categoryID != 0 {
+		var existing models.Category
+		if err := r.db.First(&existing, categoryID).Error; err == nil {
+			return existing.ID, nil
 		}
-		result := db.Create(&categoryNew)
-		if result.Error != nil {
-			return 0, result.Error
+	}
+	if err := r.db.Where("title = ?", category.Title).FirstOrCreate(&category).Error; err != nil {
+		return 0, err
+	}
+	return category.ID, nil
+}
+
+func (r *TaskRepositoryGorm) ensureTags(tags []models.Tag) ([]models.Tag, error) {
+	var result []models.Tag
+	for _, tag := range tags {
+		var existingTag models.Tag
+		if err := r.db.Where("title = ?", tag.Title).First(&existingTag).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				if err := r.db.Create(&tag).Error; err != nil {
+					return nil, err
+				}
+				result = append(result, tag)
+			} else {
+				return nil, err
+			}
+		} else {
+			result = append(result, existingTag)
 		}
-		return categoryNew.ID, nil
 	}
-	if result.Error != nil {
-		return 0, result.Error
-	}
-	return categoryID, nil
+	return result, nil
 }
 
 func (r *TaskRepositoryGorm) DeleteTask(id uint, userID uint) error {

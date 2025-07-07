@@ -51,3 +51,19 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 
 	c.JSON(http.StatusOK, updateUser)
 }
+
+func (h *Handler) GetProfile(c *gin.Context) {
+	id, err := getUserID(c)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
+		return
+	}
+
+	user, err := h.service.GetProfile(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "get user profile"})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}

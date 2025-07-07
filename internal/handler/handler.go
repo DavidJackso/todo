@@ -24,10 +24,10 @@ func (h *Handler) InitRouting() *gin.Engine {
 		auth.POST("sign-up", h.signUp)
 	}
 	api := router.Group("/api", h.UserIdentity)
-	{ 
+	{
 		user := api.Group("/profile")
 		{
-			user.GET("/")
+			user.GET("/", h.GetProfile)
 			user.PATCH("/", h.UpdateProfile)
 			user.DELETE("/", h.DeleteProfile)
 		}

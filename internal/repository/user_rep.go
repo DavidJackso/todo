@@ -54,7 +54,7 @@ func (r *UserRepositoryGorm) CreateUser(user models.User) (uint, error) {
 func (r *UserRepositoryGorm) GetUserByEmailAndPassword(email, password string) (models.User, error) {
 	var user models.User
 
-	result := r.db.Where("email=? AND password", email, password).First(&user)
+	result := r.db.Where("email=? AND password=?", email, password).First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return user, errs.ErrInvalidEmailOrPassword
