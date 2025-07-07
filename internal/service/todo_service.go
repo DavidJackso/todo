@@ -26,7 +26,7 @@ func (s *TodoService) CreateTask(task models.Task, userID uint) (uint, error) {
 		logrus.WithError(err).Error("failed create task")
 		return 0, err
 	}
-	return id, err
+	return id, nil
 }
 
 func (s *TodoService) GetTask(id uint, userID uint) (models.Task, error) {
