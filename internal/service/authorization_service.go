@@ -71,7 +71,7 @@ func (s *AuthorizationService) ParseToken(tokenString string) (uint, error) {
 func (s *AuthorizationService) GenerateToken(email, password string) (string, error) {
 	user, err := s.rep.GetUserByEmailAndPassword(email, generateHash(password, s.salt))
 	if err != nil {
-		logrus.Error(err)
+		logrus.WithError(err).Error("failed get user")
 		return "", err
 	}
 

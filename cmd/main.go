@@ -50,7 +50,6 @@ func main() {
 
 	go func() {
 		srv.ListenAndServe()
-		logrus.Info("Server started")
 	}()
 	logrus.Info("Server started")
 
