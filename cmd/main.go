@@ -23,12 +23,15 @@ func main() {
 
 	err := godotenv.Load("../.env")
 	if err != nil {
-		panic("no .env file found")
+
 	}
 
 	cfg := config.SetupConfig()
 
-	db := database.ConnectToDb(&cfg.DBConfig)
+	db, err := database.ConnectToDb(&cfg.DBConfig)
+	if err != nil {
+		logrus.WithError(err).Fatalf("failed start  http server")
+	}
 	db.AutoMigrate(&models.User{}, &models.Task{}, &models.Category{}, &models.Tag{})
 
 	repository := repository.NewRepository(db)
